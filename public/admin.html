@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Contact Logs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Contact Form Submissions</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+                <!-- Rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal-overlay" onclick="if(event.target === this) closeModal()">
+        <div class="modal-content">
+            <h2 id="modalTitle">Subject</h2>
+            <p id="modalMeta" class="modal-meta">From: ...</p>
+            <hr>
+            <p id="modalMessage" class="modal-text">Message content...</p>
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <style>
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.open {
+            background: #fefce8;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .status-badge.closed {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Actions */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-right: 4px;
+        }
+
+        .view-btn {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .view-btn:hover {
+            background: #dbeafe;
+        }
+
+        .close-action-btn {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .close-action-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .reopen-btn {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        .reopen-btn:hover {
+            background: #ffedd5;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-meta {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-text {
+            margin: 1.5rem 0;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .close-btn {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .close-btn:hover {
+            background: #e2e8f0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tbody = document.getElementById('logsTableBody');
+            try {
+                const response = await fetch('/api/logs');
+                const logs = await response.json();
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty">No submissions yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(log => `
+                    <tr>
+                        <td>${log.id}</td>
+                        <td class="timestamp">${new Date(log.created_at).toLocaleString()}</td>
+                        <td>${log.name}</td>
+                        <td>${log.email}</td>
+                        <td>
+                            <span class="status-badge ${log.status || 'open'}">${(log.status || 'open').toUpperCase()}</span>
+                        </td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="viewLog(${log.id})">View</button>
+                            ${log.status === 'closed'
+                        ? `<button class="action-btn reopen-btn" onclick="updateStatus(${log.id}, 'open')">Reopen</button>`
+                        : `<button class="action-btn resolve-btn" onclick="updateStatus(${log.id}, 'closed')">Resolve</button>`
+                    }
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Store logs for modal access
+                window.currentLogs = logs;
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                tbody.innerHTML = '<tr><td colspan="6" class="error">Failed to load logs.</td></tr>';
+            }
+        });
+
+        async function updateStatus(id, status) {
+            try {
+                const response = await fetch(`/api/logs/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                if (response.ok) {
+                    location.reload(); // Simple reload to refresh UI
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Error updating status');
+            }
+        }
+
+        function viewLog(id) {
+            const log = window.currentLogs.find(l => l.id === id);
+            if (!log) return;
+
+            document.getElementById('modalTitle').textContent = log.subject;
+            document.getElementById('modalMeta').textContent = `From: ${log.name} (${log.email}) - ${new Date(log.created_at).toLocaleString()}`;
+            document.getElementById('modalMessage').textContent = log.message;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
