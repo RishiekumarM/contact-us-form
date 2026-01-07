@@ -319,7 +319,7 @@
 
         async function updateStatus(id, status) {
             try {
-                const response = await fetch(`/ api / logs / ${id}/status`, {
+                const response = await fetch(`/api/logs/${id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status })
