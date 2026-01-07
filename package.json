@@ -1,0 +1,25 @@
+{
+  "name": "contact-us-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RishiekumarM/contact-us-form.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RishiekumarM/contact-us-form/issues"
+  },
+  "homepage": "https://github.com/RishiekumarM/contact-us-form#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.90.0"
+  }
+}
