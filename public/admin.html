@@ -290,7 +290,8 @@
                     return;
                 }
 
-                <tr>
+                tbody.innerHTML = logs.map(log => `
+                    <tr>
                     <td data-label="ID">${log.id}</td>
                     <td data-label="Date" class="timestamp">${new Date(log.created_at).toLocaleString()}</td>
                     <td data-label="Name">${log.name}</td>
@@ -301,9 +302,9 @@
                     <td data-label="Actions">
                         <button class="action-btn view-btn" onclick="viewLog(${log.id})">View</button>
                         ${log.status === 'closed'
-                            ? `<button class="action-btn reopen-btn" onclick="updateStatus(${log.id}, 'open')">Reopen</button>`
-                            : `<button class="action-btn resolve-btn" onclick="updateStatus(${log.id}, 'closed')">Resolve</button>`
-                        }
+                        ? `<button class="action-btn reopen-btn" onclick="updateStatus(${log.id}, 'open')">Reopen</button>`
+                        : `<button class="action-btn resolve-btn" onclick="updateStatus(${log.id}, 'closed')">Resolve</button>`
+                    }
                     </td>
                 </tr>
                 `).join('');
@@ -318,20 +319,20 @@
 
         async function updateStatus(id, status) {
             try {
-                const response = await fetch(`/ api / logs / ${ id }/status`, {
-                method: 'PATCH',
+                const response = await fetch(`/ api / logs / ${id}/status`, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-        if (response.ok) {
-            location.reload(); // Simple reload to refresh UI
-        } else {
-            alert('Failed to update status');
-        }
+                    body: JSON.stringify({ status })
+                });
+                if (response.ok) {
+                    location.reload(); // Simple reload to refresh UI
+                } else {
+                    alert('Failed to update status');
+                }
             } catch (err) {
-            console.error('Error:', err);
-            alert('Error updating status');
-        }
+                console.error('Error:', err);
+                alert('Error updating status');
+            }
         }
 
         function viewLog(id) {
