@@ -274,10 +274,19 @@
             const tbody = document.getElementById('logsTableBody');
             try {
                 const response = await fetch('/api/logs');
+                // DEBUG: Check status
+                if (!response.ok) {
+                    alert('API Error: ' + response.status);
+                    throw new Error('API failed');
+                }
                 const logs = await response.json();
 
+                // DEBUG: Show what we got
+                console.log('Logs:', logs);
+                // alert('Fetched ' + logs.length + ' logs');
+
                 if (logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="empty">No submissions yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty">No submissions yet (Database is empty).</td></tr>';
                     return;
                 }
 
