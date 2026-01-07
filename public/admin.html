@@ -63,6 +63,71 @@
             padding: 20px;
             color: #6b7280;
         }
+
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                border-bottom: 1px solid #f3f4f6;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td::before {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: #6b7280;
+                text-align: left;
+                content: attr(data-label);
+            }
+
+            .action-btn {
+                width: 100%;
+                margin: 5px 0;
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -216,23 +281,22 @@
                     return;
                 }
 
-                tbody.innerHTML = logs.map(log => `
-                    <tr>
-                        <td>${log.id}</td>
-                        <td class="timestamp">${new Date(log.created_at).toLocaleString()}</td>
-                        <td>${log.name}</td>
-                        <td>${log.email}</td>
-                        <td>
-                            <span class="status-badge ${log.status || 'open'}">${(log.status || 'open').toUpperCase()}</span>
-                        </td>
-                        <td>
-                            <button class="action-btn view-btn" onclick="viewLog(${log.id})">View</button>
-                            ${log.status === 'closed'
-                        ? `<button class="action-btn reopen-btn" onclick="updateStatus(${log.id}, 'open')">Reopen</button>`
-                        : `<button class="action-btn resolve-btn" onclick="updateStatus(${log.id}, 'closed')">Resolve</button>`
-                    }
-                        </td>
-                    </tr>
+                <tr>
+                    <td data-label="ID">${log.id}</td>
+                    <td data-label="Date" class="timestamp">${new Date(log.created_at).toLocaleString()}</td>
+                    <td data-label="Name">${log.name}</td>
+                    <td data-label="Email">${log.email}</td>
+                    <td data-label="Status">
+                        <span class="status-badge ${log.status || 'open'}">${(log.status || 'open').toUpperCase()}</span>
+                    </td>
+                    <td data-label="Actions">
+                        <button class="action-btn view-btn" onclick="viewLog(${log.id})">View</button>
+                        ${log.status === 'closed'
+                            ? `<button class="action-btn reopen-btn" onclick="updateStatus(${log.id}, 'open')">Reopen</button>`
+                            : `<button class="action-btn resolve-btn" onclick="updateStatus(${log.id}, 'closed')">Resolve</button>`
+                        }
+                    </td>
+                </tr>
                 `).join('');
 
                 // Store logs for modal access
@@ -245,20 +309,20 @@
 
         async function updateStatus(id, status) {
             try {
-                const response = await fetch(`/api/logs/${id}/status`, {
-                    method: 'PATCH',
+                const response = await fetch(`/ api / logs / ${ id }/status`, {
+                method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status })
-                });
-                if (response.ok) {
-                    location.reload(); // Simple reload to refresh UI
-                } else {
-                    alert('Failed to update status');
-                }
+                body: JSON.stringify({ status })
+            });
+        if (response.ok) {
+            location.reload(); // Simple reload to refresh UI
+        } else {
+            alert('Failed to update status');
+        }
             } catch (err) {
-                console.error('Error:', err);
-                alert('Error updating status');
-            }
+            console.error('Error:', err);
+            alert('Error updating status');
+        }
         }
 
         function viewLog(id) {
