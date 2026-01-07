@@ -2,7 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client
 // For local testing, ensure these are set in your environment
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.SUPABASE_DATABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
